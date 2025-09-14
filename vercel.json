@@ -15,12 +15,8 @@
       "destination": "/public/rhythm.html"
     },
     {
-      "source": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "destination": "/public/$1"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/public/index.html"
+      "destination": "/public/$1"
     }
   ],
   "functions": {
