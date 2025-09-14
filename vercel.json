@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "name": "test-ai-webapp",
   "builds": [
     {
       "src": "api/**/*.js",
