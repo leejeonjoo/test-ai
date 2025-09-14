@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 단일 페이지 앱</title>
+
+    <!-- CDN을 통한 외부 라이브러리 로드 -->
+    <!-- Bootstrap CSS - 반응형 UI 프레임워크 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome - 아이콘 라이브러리 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- 커스텀 스타일 -->
+    <style>
+        /* 전체 페이지 배경 스타일 */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* 메인 컨테이너 스타일 */
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-top: 50px;
+            padding: 40px;
+        }
+
+        /* 헤더 스타일 */
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* 카드 스타일 */
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 10px;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 버튼 스타일 */
+        .custom-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        /* 애니메이션 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* 파일 업로드 영역 스타일 */
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(102, 126, 234, 0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .progress {
+            height: 8px;
+            margin-top: 10px;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 메인 컨테이너 -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="main-container animate-fade-in">
+
+                    <!-- 헤더 섹션 -->
+                    <div class="header-section">
+                        <h1 class="display-4 text-primary mb-3">
+                            <i class="fas fa-rocket me-3"></i>
+                            웹 앱 센터
+                        </h1>
+                        <p class="lead text-muted">
+                            PDF 도구와 게임을 한 곳에서 즐겨보세요!
+                        </p>
+                    </div>
+
+                    <!-- 앱 선택 섹션 -->
+                    <div class="row g-4 mb-5">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <div class="card-body text-center text-white p-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-file-pdf fa-4x opacity-75"></i>
+                                    </div>
+                                    <h4 class="card-title mb-3">PDF 도구</h4>
+                                    <p class="card-text mb-3">
+                                        이미지를 PDF로 변환하고
+                                        여러 PDF를 병합할 수 있습니다
+                                    </p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-image me-1"></i>변환
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-layer-group me-1"></i>병합
+                                        </span>
+                                    </div>
+                                    <button class="btn btn-light px-3" onclick="showPdfTools()">
+                                        <i class="fas fa-tools me-2"></i>
+                                        PDF 도구 열기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 border-0 shadow-lg" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">
+                                <div class="card-body text-center text-white p-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-gamepad fa-4x opacity-75"></i>
+                                    </div>
+                                    <h4 class="card-title mb-3">벽돌깨기</h4>
+                                    <p class="card-text mb-3">
+                                        클래식한 벽돌깨기 게임을
+                                        브라우저에서 즐겨보세요
+                                    </p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-mouse me-1"></i>마우스
+                                        </span>
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-keyboard me-1"></i>키보드
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-mobile-alt me-1"></i>모바일
+                                        </span>
+                                    </div>
+                                    <a href="/breakout.html" class="btn btn-light px-3">
+                                        <i class="fas fa-play me-2"></i>
+                                        게임 시작
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card h-100 border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);">
+                                <div class="card-body text-center text-white p-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-music fa-4x opacity-75"></i>
+                                    </div>
+                                    <h4 class="card-title mb-3">Arrow Dance</h4>
+                                    <p class="card-text mb-3">
+                                        리듬에 맞춰 화살표를 누르는
+                                        리듬 액션 게임입니다
+                                    </p>
+                                    <div class="mb-3">
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-arrows-alt me-1"></i>화살표
+                                        </span>
+                                        <span class="badge bg-light text-dark me-1">
+                                            <i class="fas fa-star me-1"></i>콤보
+                                        </span>
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-trophy me-1"></i>점수
+                                        </span>
+                                    </div>
+                                    <a href="/rhythm.html" class="btn btn-light px-3">
+                                        <i class="fas fa-music me-2"></i>
+                                        리듬 게임
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PDF 기능 섹션 -->
+                    <div class="row mb-4 d-none" id="pdf-tools-section">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-tools me-2"></i>
+                                        PDF 처리 도구
+                                    </h5>
+                                    <button class="btn btn-outline-light btn-sm" onclick="hidePdfTools()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <!-- 탭 네비게이션 -->
+                                    <ul class="nav nav-tabs" id="pdfTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="convert-tab" data-bs-toggle="tab" data-bs-target="#convert-panel" type="button" role="tab">
+                                                <i class="fas fa-image me-1"></i>
+                                                이미지 → PDF
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="merge-tab" data-bs-toggle="tab" data-bs-target="#merge-panel" type="button" role="tab">
+                                                <i class="fas fa-file-pdf me-1"></i>
+                                                PDF 병합
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    <!-- 탭 콘텐츠 -->
+                                    <div class="tab-content" id="pdfTabContent">
+                                        <!-- 이미지를 PDF로 변환 -->
+                                        <div class="tab-pane fade show active" id="convert-panel" role="tabpanel">
+                                            <h6 class="mb-3">
+                                                <i class="fas fa-upload me-2 text-primary"></i>
+                                                JPG/PNG 이미지를 PDF로 변환
+                                            </h6>
+
+                                            <div class="upload-area" id="image-upload-area">
+                                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                                <p class="mb-2">이미지 파일을 여기에 드래그하거나 클릭하여 선택하세요</p>
+                                                <p class="text-muted small">지원 형식: JPG, PNG (최대 10MB)</p>
+                                                <input type="file" id="image-input" multiple accept="image/*" class="d-none">
+                                            </div>
+
+                                            <div id="image-file-list" class="file-list d-none">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <strong>선택된 이미지 파일들:</strong>
+                                                    <button class="btn btn-sm btn-outline-secondary" id="clear-images">
+                                                        <i class="fas fa-times"></i> 전체 삭제
+                                                    </button>
+                                                </div>
+                                                <div id="image-files"></div>
+                                            </div>
+
+                                            <div class="text-center mt-3">
+                                                <button class="btn custom-btn" id="convert-to-pdf-btn" disabled>
+                                                    <i class="fas fa-file-pdf me-1"></i>
+                                                    PDF로 변환하기
+                                                </button>
+                                            </div>
+
+                                            <div id="convert-progress" class="d-none">
+                                                <div class="progress">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                                </div>
+                                                <p class="text-center mt-2 mb-0">PDF 변환 중...</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- PDF 병합 -->
+                                        <div class="tab-pane fade" id="merge-panel" role="tabpanel">
+                                            <h6 class="mb-3">
+                                                <i class="fas fa-layer-group me-2 text-warning"></i>
+                                                여러 PDF 파일을 하나로 병합
+                                            </h6>
+
+                                            <div class="upload-area" id="pdf-upload-area">
+                                                <i class="fas fa-file-pdf fa-3x text-muted mb-3"></i>
+                                                <p class="mb-2">PDF 파일을 여기에 드래그하거나 클릭하여 선택하세요</p>
+                                                <p class="text-muted small">지원 형식: PDF (최대 10MB 각각)</p>
+                                                <input type="file" id="pdf-input" multiple accept=".pdf" class="d-none">
+                                            </div>
+
+                                            <div id="pdf-file-list" class="file-list d-none">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <strong>선택된 PDF 파일들:</strong>
+                                                    <button class="btn btn-sm btn-outline-secondary" id="clear-pdfs">
+                                                        <i class="fas fa-times"></i> 전체 삭제
+                                                    </button>
+                                                </div>
+                                                <div id="pdf-files"></div>
+                                            </div>
+
+                                            <div class="text-center mt-3">
+                                                <button class="btn custom-btn" id="merge-pdfs-btn" disabled>
+                                                    <i class="fas fa-layer-group me-1"></i>
+                                                    PDF 병합하기
+                                                </button>
+                                            </div>
+
+                                            <div id="merge-progress" class="d-none">
+                                                <div class="progress">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 0%"></div>
+                                                </div>
+                                                <p class="text-center mt-2 mb-0">PDF 병합 중...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- 기능 카드 섹션 -->
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-4">
+                            <div class="card feature-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-mobile-alt fa-3x text-info"></i>
+                                    </div>
+                                    <h5 class="card-title">반응형 디자인</h5>
+                                    <p class="card-text text-muted">
+                                        모든 기기에서 완벽하게 작동하는 반응형 웹 애플리케이션
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card feature-card">
+                                <div class="card-body text-center p-4">
+                                    <div class="mb-3">
+                                        <i class="fas fa-bolt fa-3x text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title">빠른 성능</h5>
+                                    <p class="card-text text-muted">
+                                        CDN을 활용한 최적화된 리소스 로딩으로 빠른 페이지 로드
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <a href="/breakout.html" class="text-decoration-none">
+                                <div class="card feature-card">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <i class="fas fa-gamepad fa-3x text-success"></i>
+                                        </div>
+                                        <h5 class="card-title">벽돌깨기 게임</h5>
+                                        <p class="card-text text-muted">
+                                            클래식한 벽돌깨기 게임을 즐겨보세요! 클릭하여 플레이
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 인터랙션 섹션 -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-cogs me-2"></i>
+                                        애플리케이션 제어판
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <p class="mb-2 fw-bold">현재 시간:</p>
+                                            <p id="current-time" class="text-primary fs-5">--</p>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <button id="refresh-time" class="btn custom-btn me-2">
+                                                <i class="fas fa-sync-alt me-1"></i>
+                                                시간 새로고침
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- 알림 영역 -->
+                    <div id="notification-area"></div>
+
+                    <!-- 푸터 -->
+                    <footer class="text-center pt-4 border-top">
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-heart text-danger me-1"></i>
+                            한국어 SPA 데모 앱 - Express.js 서버에서 제공
+                        </p>
+                    </footer>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDN을 통한 JavaScript 라이브러리 로드 -->
+    <!-- Bootstrap JS - UI 컴포넌트 기능 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 커스텀 JavaScript -->
+    <script>
+        // 페이지 로드 시 실행되는 초기화 함수
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 한국어 SPA 애플리케이션이 로드되었습니다!');
+
+            // 초기 시간 설정
+            updateCurrentTime();
+
+            // 1초마다 시간 업데이트
+            setInterval(updateCurrentTime, 1000);
+
+            // 이벤트 리스너 등록
+            setupEventListeners();
+
+            // 환영 메시지 표시
+            showNotification('애플리케이션이 성공적으로 로드되었습니다!', 'success');
+        });
+
+        /**
+         * 현재 시간을 업데이트하는 함수
+         * 한국 시간 기준으로 표시
+         */
+        function updateCurrentTime() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Asia/Seoul',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+
+            const timeString = now.toLocaleString('ko-KR', options);
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        /**
+         * 이벤트 리스너를 설정하는 함수
+         */
+        function setupEventListeners() {
+            // 시간 새로고침 버튼 이벤트
+            document.getElementById('refresh-time').addEventListener('click', function() {
+                // 버튼 애니메이션 효과
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+
+                // 시간 업데이트 및 알림 표시
+                updateCurrentTime();
+                showNotification('시간이 새로고침되었습니다.', 'info');
+            });
+
+            // 카드 호버 효과 개선
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#667eea';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.borderColor = '';
+                });
+            });
+        }
+
+        /**
+         * 알림 메시지를 표시하는 함수
+         * @param {string} message - 표시할 메시지
+         * @param {string} type - 알림 타입 (success, info, warning, danger)
+         */
+        function showNotification(message, type = 'info') {
+            const notificationArea = document.getElementById('notification-area');
+
+            // 알림 요소 생성
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.setAttribute('role', 'alert');
+
+            // 타입별 아이콘 설정
+            const icons = {
+                success: 'fas fa-check-circle',
+                info: 'fas fa-info-circle',
+                warning: 'fas fa-exclamation-triangle',
+                danger: 'fas fa-times-circle'
+            };
+
+            alertDiv.innerHTML = `
+                <i class="${icons[type]} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // 알림 영역에 추가
+            notificationArea.appendChild(alertDiv);
+
+            // 5초 후 자동 제거
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        /**
+         * SPA 라우팅 시뮬레이션 함수 (데모용)
+         * 실제 프로젝트에서는 React Router, Vue Router 등을 사용
+         */
+        function navigateTo(path) {
+            console.log(`🔄 내비게이션: ${path}`);
+            showNotification(`페이지 이동: ${path}`, 'info');
+
+            // 실제 SPA에서는 여기서 컴포넌트를 렌더링하거나 뷰를 변경
+            // 현재는 데모이므로 콘솔 로그와 알림만 표시
+        }
+
+        /**
+         * 애플리케이션 상태 관리 객체
+         */
+        const AppState = {
+            currentUser: null,
+            theme: 'light',
+            language: 'ko',
+
+            /**
+             * 사용자 설정
+             */
+            setUser: function(user) {
+                this.currentUser = user;
+                console.log('👤 사용자 설정:', user);
+            },
+
+            /**
+             * 테마 변경
+             */
+            setTheme: function(theme) {
+                this.theme = theme;
+                console.log('🎨 테마 변경:', theme);
+                showNotification(`테마가 ${theme}로 변경되었습니다.`, 'success');
+            }
+        };
+
+        // 전역 객체로 등록 (디버깅용)
+        window.AppState = AppState;
+
+        // 개발자 도구에서 사용할 수 있는 유틸리티 함수들
+        window.debugUtils = {
+            showTime: updateCurrentTime,
+            notify: showNotification,
+            navigate: navigateTo,
+            state: AppState
+        };
+
+        console.log('💡 개발자 도구에서 window.debugUtils를 사용해 앱을 테스트할 수 있습니다.');
+
+        // ========== PDF 기능 관련 함수들 ==========
+
+        /**
+         * 파일 업로드 관련 변수
+         */
+        let selectedImages = [];
+        let selectedPdfs = [];
+
+        /**
+         * PDF 기능 이벤트 리스너 설정
+         */
+        function setupPdfEventListeners() {
+            // 이미지 업로드 영역
+            const imageUploadArea = document.getElementById('image-upload-area');
+            const imageInput = document.getElementById('image-input');
+            const imageFileList = document.getElementById('image-file-list');
+            const imageFiles = document.getElementById('image-files');
+            const clearImagesBtn = document.getElementById('clear-images');
+            const convertBtn = document.getElementById('convert-to-pdf-btn');
+
+            // PDF 업로드 영역
+            const pdfUploadArea = document.getElementById('pdf-upload-area');
+            const pdfInput = document.getElementById('pdf-input');
+            const pdfFileList = document.getElementById('pdf-file-list');
+            const pdfFiles = document.getElementById('pdf-files');
+            const clearPdfsBtn = document.getElementById('clear-pdfs');
+            const mergeBtn = document.getElementById('merge-pdfs-btn');
+
+            // 이미지 업로드 이벤트
+            imageUploadArea.addEventListener('click', () => imageInput.click());
+            imageUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                imageUploadArea.classList.add('dragover');
+            });
+            imageUploadArea.addEventListener('dragleave', () => {
+                imageUploadArea.classList.remove('dragover');
+            });
+            imageUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                imageUploadArea.classList.remove('dragover');
+                handleImageFiles(e.dataTransfer.files);
+            });
+
+            imageInput.addEventListener('change', (e) => {
+                handleImageFiles(e.target.files);
+            });
+
+            clearImagesBtn.addEventListener('click', () => {
+                selectedImages = [];
+                updateImageFileList();
+            });
+
+            convertBtn.addEventListener('click', convertToPdf);
+
+            // PDF 업로드 이벤트
+            pdfUploadArea.addEventListener('click', () => pdfInput.click());
+            pdfUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                pdfUploadArea.classList.add('dragover');
+            });
+            pdfUploadArea.addEventListener('dragleave', () => {
+                pdfUploadArea.classList.remove('dragover');
+            });
+            pdfUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                pdfUploadArea.classList.remove('dragover');
+                handlePdfFiles(e.dataTransfer.files);
+            });
+
+            pdfInput.addEventListener('change', (e) => {
+                handlePdfFiles(e.target.files);
+            });
+
+            clearPdfsBtn.addEventListener('click', () => {
+                selectedPdfs = [];
+                updatePdfFileList();
+            });
+
+            mergeBtn.addEventListener('click', mergePdfs);
+        }
+
+        /**
+         * 이미지 파일 처리
+         */
+        function handleImageFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    if (file.size <= 10 * 1024 * 1024) { // 10MB 제한
+                        selectedImages.push(file);
+                    } else {
+                        showNotification(`파일 크기가 너무 큽니다: ${file.name} (최대 10MB)`, 'warning');
+                    }
+                } else {
+                    showNotification(`지원하지 않는 파일 형식입니다: ${file.name}`, 'warning');
+                }
+            });
+            updateImageFileList();
+        }
+
+        /**
+         * PDF 파일 처리
+         */
+        function handlePdfFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type === 'application/pdf') {
+                    if (file.size <= 10 * 1024 * 1024) { // 10MB 제한
+                        selectedPdfs.push(file);
+                    } else {
+                        showNotification(`파일 크기가 너무 큽니다: ${file.name} (최대 10MB)`, 'warning');
+                    }
+                } else {
+                    showNotification(`지원하지 않는 파일 형식입니다: ${file.name}`, 'warning');
+                }
+            });
+            updatePdfFileList();
+        }
+
+        /**
+         * 이미지 파일 목록 업데이트
+         */
+        function updateImageFileList() {
+            const imageFiles = document.getElementById('image-files');
+            const imageFileList = document.getElementById('image-file-list');
+            const convertBtn = document.getElementById('convert-to-pdf-btn');
+
+            if (selectedImages.length === 0) {
+                imageFileList.classList.add('d-none');
+                convertBtn.disabled = true;
+            } else {
+                imageFileList.classList.remove('d-none');
+                convertBtn.disabled = false;
+
+                imageFiles.innerHTML = selectedImages.map((file, index) => `
+                    <div class="file-item">
+                        <span>
+                            <i class="fas fa-image me-2 text-primary"></i>
+                            ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeImageFile(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        /**
+         * PDF 파일 목록 업데이트
+         */
+        function updatePdfFileList() {
+            const pdfFiles = document.getElementById('pdf-files');
+            const pdfFileList = document.getElementById('pdf-file-list');
+            const mergeBtn = document.getElementById('merge-pdfs-btn');
+
+            if (selectedPdfs.length === 0) {
+                pdfFileList.classList.add('d-none');
+                mergeBtn.disabled = true;
+            } else {
+                pdfFileList.classList.remove('d-none');
+                mergeBtn.disabled = selectedPdfs.length < 2;
+
+                pdfFiles.innerHTML = selectedPdfs.map((file, index) => `
+                    <div class="file-item">
+                        <span>
+                            <i class="fas fa-file-pdf me-2 text-danger"></i>
+                            ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removePdfFile(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        /**
+         * 이미지 파일 제거
+         */
+        function removeImageFile(index) {
+            selectedImages.splice(index, 1);
+            updateImageFileList();
+        }
+
+        /**
+         * PDF 파일 제거
+         */
+        function removePdfFile(index) {
+            selectedPdfs.splice(index, 1);
+            updatePdfFileList();
+        }
+
+        /**
+         * 이미지를 PDF로 변환
+         */
+        async function convertToPdf() {
+            if (selectedImages.length === 0) {
+                showNotification('변환할 이미지를 선택해주세요.', 'warning');
+                return;
+            }
+
+            const progressDiv = document.getElementById('convert-progress');
+            const progressBar = progressDiv.querySelector('.progress-bar');
+            const convertBtn = document.getElementById('convert-to-pdf-btn');
+
+            try {
+                // 진행 상황 표시
+                progressDiv.classList.remove('d-none');
+                progressBar.style.width = '20%';
+                convertBtn.disabled = true;
+
+                const formData = new FormData();
+                selectedImages.forEach(file => {
+                    formData.append('images', file);
+                });
+
+                progressBar.style.width = '50%';
+
+                const response = await fetch('/convert-to-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                progressBar.style.width = '80%';
+
+                const result = await response.json();
+
+                if (result.success) {
+                    progressBar.style.width = '100%';
+                    showNotification('PDF 변환이 완료되었습니다!', 'success');
+
+                    // 다운로드 링크 표시
+                    showDownloadLink(result.downloadUrl, result.filename, 'convert-panel');
+
+                    // 파일 목록 초기화
+                    selectedImages = [];
+                    updateImageFileList();
+                } else {
+                    throw new Error(result.error || 'PDF 변환에 실패했습니다.');
+                }
+
+            } catch (error) {
+                console.error('PDF 변환 오류:', error);
+                showNotification(`변환 오류: ${error.message}`, 'danger');
+            } finally {
+                // 진행 상황 숨기기
+                setTimeout(() => {
+                    progressDiv.classList.add('d-none');
+                    progressBar.style.width = '0%';
+                    convertBtn.disabled = false;
+                }, 1000);
+            }
+        }
+
+        /**
+         * PDF 파일 병합
+         */
+        async function mergePdfs() {
+            if (selectedPdfs.length < 2) {
+                showNotification('병합할 PDF 파일을 최소 2개 이상 선택해주세요.', 'warning');
+                return;
+            }
+
+            const progressDiv = document.getElementById('merge-progress');
+            const progressBar = progressDiv.querySelector('.progress-bar');
+            const mergeBtn = document.getElementById('merge-pdfs-btn');
+
+            try {
+                // 진행 상황 표시
+                progressDiv.classList.remove('d-none');
+                progressBar.style.width = '20%';
+                mergeBtn.disabled = true;
+
+                const formData = new FormData();
+                selectedPdfs.forEach(file => {
+                    formData.append('pdfs', file);
+                });
+
+                progressBar.style.width = '50%';
+
+                const response = await fetch('/merge-pdfs', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                progressBar.style.width = '80%';
+
+                const result = await response.json();
+
+                if (result.success) {
+                    progressBar.style.width = '100%';
+                    showNotification('PDF 병합이 완료되었습니다!', 'success');
+
+                    // 다운로드 링크 표시
+                    showDownloadLink(result.downloadUrl, result.filename, 'merge-panel');
+
+                    // 파일 목록 초기화
+                    selectedPdfs = [];
+                    updatePdfFileList();
+                } else {
+                    throw new Error(result.error || 'PDF 병합에 실패했습니다.');
+                }
+
+            } catch (error) {
+                console.error('PDF 병합 오류:', error);
+                showNotification(`병합 오류: ${error.message}`, 'danger');
+            } finally {
+                // 진행 상황 숨기기
+                setTimeout(() => {
+                    progressDiv.classList.add('d-none');
+                    progressBar.style.width = '0%';
+                    mergeBtn.disabled = false;
+                }, 1000);
+            }
+        }
+
+        /**
+         * 다운로드 링크 표시
+         */
+        function showDownloadLink(downloadUrl, filename, panelId) {
+            const panel = document.getElementById(panelId);
+            const existingLink = panel.querySelector('.download-link');
+
+            // 기존 링크 제거
+            if (existingLink) {
+                existingLink.remove();
+            }
+
+            // 새 다운로드 링크 생성
+            const downloadDiv = document.createElement('div');
+            downloadDiv.className = 'alert alert-success download-link mt-3';
+            downloadDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-download me-2"></i>
+                        <strong>다운로드 준비 완료:</strong> ${filename}
+                    </div>
+                    <div>
+                        <a href="${downloadUrl}" class="btn btn-success btn-sm me-2" download>
+                            <i class="fas fa-download me-1"></i>다운로드
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm" onclick="deleteFile('${filename}', this.parentElement.parentElement.parentElement)">
+                            <i class="fas fa-trash me-1"></i>삭제
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            panel.appendChild(downloadDiv);
+        }
+
+        /**
+         * 서버에서 파일 삭제
+         */
+        async function deleteFile(filename, element) {
+            try {
+                const response = await fetch(`/delete-file/${filename}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    element.remove();
+                    showNotification('파일이 삭제되었습니다.', 'info');
+                } else {
+                    throw new Error(result.error || '파일 삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('파일 삭제 오류:', error);
+                showNotification(`삭제 오류: ${error.message}`, 'danger');
+            }
+        }
+
+        // 페이지 로드 시 PDF 이벤트 리스너 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPdfEventListeners();
+        });
+
+        /**
+         * PDF 도구 섹션 표시
+         */
+        function showPdfTools() {
+            const pdfSection = document.getElementById('pdf-tools-section');
+            pdfSection.classList.remove('d-none');
+
+            // 부드럽게 스크롤하여 PDF 도구로 이동
+            pdfSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+
+            showNotification('PDF 도구가 활성화되었습니다!', 'success');
+        }
+
+        /**
+         * PDF 도구 섹션 숨기기
+         */
+        function hidePdfTools() {
+            const pdfSection = document.getElementById('pdf-tools-section');
+            pdfSection.classList.add('d-none');
+
+            // 맨 위로 부드럽게 스크롤
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
+            showNotification('PDF 도구가 숨겨졌습니다.', 'info');
+        }
+    </script>
+</body>
+</html>

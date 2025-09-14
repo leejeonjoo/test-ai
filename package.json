@@ -1,0 +1,23 @@
+{
+  "name": "korean-spa-app",
+  "version": "1.0.0",
+  "description": "한국어 단일 페이지 앱",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "spa",
+    "korean",
+    "static-server"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
+    "pdf2pic": "^3.2.0",
+    "sharp": "^0.34.3"
+  }
+}

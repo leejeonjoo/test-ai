@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리듬 게임 - Arrow Dance</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .game-header {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .game-canvas {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border: 4px solid #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .game-controls {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .btn-game {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .btn-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+            color: white;
+        }
+
+        .btn-game:disabled {
+            background: #666;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .arrow-keys {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .arrow-key {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .arrow-key.active {
+            background: rgba(255, 215, 0, 0.8);
+            border-color: #ffd700;
+            transform: scale(0.95);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .game-instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            color: #ccc;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .back-link:hover {
+            color: #ffd700;
+            transform: translateX(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 8px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .combo-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .arrow-key {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .stat-value {
+                font-size: 1.4rem;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-game {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">
+        <i class="fas fa-arrow-left me-2"></i>
+        메인으로 돌아가기
+    </a>
+
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="display-4">
+                <i class="fas fa-music me-3"></i>
+                Arrow Dance
+            </h1>
+            <p class="lead">리듬에 맞춰 화살표를 눌러보세요!</p>
+        </div>
+
+        <canvas id="gameCanvas" class="game-canvas" width="900" height="600"></canvas>
+
+        <div class="game-controls">
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="score">0</span>
+                    <div class="stat-label">점수</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="combo">0</span>
+                    <div class="stat-label">콤보</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="accuracy">100%</span>
+                    <div class="stat-label">정확도</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="level">1</span>
+                    <div class="stat-label">레벨</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="bpm">120</span>
+                    <div class="stat-label">BPM</div>
+                </div>
+            </div>
+
+            <div class="difficulty-selector">
+                <div class="difficulty-btn active" data-difficulty="easy">
+                    <i class="fas fa-seedling me-1"></i>쉬움
+                </div>
+                <div class="difficulty-btn" data-difficulty="normal">
+                    <i class="fas fa-star me-1"></i>보통
+                </div>
+                <div class="difficulty-btn" data-difficulty="hard">
+                    <i class="fas fa-fire me-1"></i>어려움
+                </div>
+                <div class="difficulty-btn" data-difficulty="expert">
+                    <i class="fas fa-crown me-1"></i>전문가
+                </div>
+            </div>
+
+            <div class="arrow-keys">
+                <div class="arrow-key" data-direction="left" id="leftKey">
+                    <i class="fas fa-arrow-left"></i>
+                </div>
+                <div class="arrow-key" data-direction="up" id="upKey">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="arrow-key" data-direction="down" id="downKey">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="arrow-key" data-direction="right" id="rightKey">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button id="startBtn" class="btn btn-game">
+                    <i class="fas fa-play me-1"></i>게임 시작
+                </button>
+                <button id="pauseBtn" class="btn btn-game" disabled>
+                    <i class="fas fa-pause me-1"></i>일시정지
+                </button>
+                <button id="resetBtn" class="btn btn-game">
+                    <i class="fas fa-redo me-1"></i>다시 시작
+                </button>
+            </div>
+
+            <div class="game-instructions">
+                <h6><i class="fas fa-info-circle me-2"></i>게임 방법</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li><strong>키보드:</strong> ← ↑ ↓ → 화살표 키 사용</li>
+                            <li><strong>마우스/터치:</strong> 화면의 화살표 버튼 클릭</li>
+                            <li><strong>타이밍:</strong> 화살표가 타겟 라인에 도달할 때 누르세요</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-0">
+                            <li><strong>판정:</strong> Perfect > Good > Bad > Miss</li>
+                            <li><strong>콤보:</strong> 연속으로 성공하면 점수 배수 증가</li>
+                            <li><strong>레벨업:</strong> 점수가 올라갈수록 속도가 빨라집니다</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 콤보 표시 -->
+    <div id="comboDisplay" class="combo-display"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 게임 변수들
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 게임 상태
+        let gameRunning = false;
+        let gamePaused = false;
+        let gameLoop = null;
+
+        // 게임 설정
+        let currentDifficulty = 'easy';
+        const difficulties = {
+            easy: { bpm: 120, speed: 2, spawnRate: 0.008 },
+            normal: { bpm: 140, speed: 3, spawnRate: 0.012 },
+            hard: { bpm: 160, speed: 4, spawnRate: 0.016 },
+            expert: { bpm: 180, speed: 5, spawnRate: 0.020 }
+        };
+
+        // 게임 상태 변수들
+        let score = 0;
+        let combo = 0;
+        let totalHits = 0;
+        let perfectHits = 0;
+        let goodHits = 0;
+        let badHits = 0;
+        let missHits = 0;
+        let level = 1;
+        let bpm = 120;
+
+        // 화살표 배열
+        let arrows = [];
+        const arrowTypes = ['left', 'up', 'down', 'right'];
+
+        // 타겟 라인 위치 (화면 하단에서 100px)
+        const targetY = canvas.height - 100;
+
+        // 화살표 레인 위치
+        const lanes = {
+            left: canvas.width / 2 - 150,
+            up: canvas.width / 2 - 50,
+            down: canvas.width / 2 + 50,
+            right: canvas.width / 2 + 150
+        };
+
+        // 키 상태
+        const keys = {
+            'ArrowLeft': false,
+            'ArrowUp': false,
+            'ArrowDown': false,
+            'ArrowRight': false
+        };
+
+        const keyMapping = {
+            'ArrowLeft': 'left',
+            'ArrowUp': 'up',
+            'ArrowDown': 'down',
+            'ArrowRight': 'right'
+        };
+
+        // 컨트롤 요소들
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const comboDisplay = document.getElementById('comboDisplay');
+
+        // 화살표 키 요소들
+        const arrowKeys = {
+            left: document.getElementById('leftKey'),
+            up: document.getElementById('upKey'),
+            down: document.getElementById('downKey'),
+            right: document.getElementById('rightKey')
+        };
+
+        // 이벤트 리스너 설정
+        startBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', togglePause);
+        resetBtn.addEventListener('click', resetGame);
+
+        // 난이도 선택
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (gameRunning) return;
+
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentDifficulty = e.target.dataset.difficulty;
+                updateDifficulty();
+            });
+        });
+
+        // 키보드 이벤트
+        document.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                e.preventDefault();
+                if (!keys[e.key]) {
+                    keys[e.key] = true;
+                    handleKeyPress(keyMapping[e.key]);
+                }
+            }
+
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (!gameRunning && !gamePaused) {
+                    startGame();
+                } else if (gameRunning) {
+                    togglePause();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = false;
+                releaseKey(keyMapping[e.key]);
+            }
+        });
+
+        // 마우스/터치 이벤트
+        Object.keys(arrowKeys).forEach(direction => {
+            const keyElement = arrowKeys[direction];
+
+            keyElement.addEventListener('mousedown', () => handleKeyPress(direction));
+            keyElement.addEventListener('mouseup', () => releaseKey(direction));
+            keyElement.addEventListener('mouseleave', () => releaseKey(direction));
+
+            keyElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleKeyPress(direction);
+            });
+            keyElement.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                releaseKey(direction);
+            });
+        });
+
+        // 화살표 클래스
+        class Arrow {
+            constructor(type) {
+                this.type = type;
+                this.x = lanes[type];
+                this.y = -50;
+                this.width = 60;
+                this.height = 60;
+                this.speed = difficulties[currentDifficulty].speed + (level - 1) * 0.5;
+                this.hit = false;
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+
+            draw() {
+                const centerX = this.x + this.width / 2;
+                const centerY = this.y + this.height / 2;
+
+                // 화살표 그림자
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(this.x + 2, this.y + 2, this.width, this.height);
+
+                // 화살표 배경
+                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+                gradient.addColorStop(0, '#4facfe');
+                gradient.addColorStop(1, '#00f2fe');
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+
+                // 화살표 테두리
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+                // 화살표 아이콘
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 30px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const arrows = {
+                    left: '←',
+                    up: '↑',
+                    down: '↓',
+                    right: '→'
+                };
+
+                ctx.fillText(arrows[this.type], centerX, centerY);
+            }
+
+            isInTarget() {
+                const distance = Math.abs(this.y + this.height / 2 - targetY);
+                return distance < 40; // 타겟 범위
+            }
+
+            getJudgment() {
+                const distance = Math.abs(this.y + this.height / 2 - targetY);
+                if (distance < 15) return 'perfect';
+                if (distance < 25) return 'good';
+                if (distance < 40) return 'bad';
+                return 'miss';
+            }
+        }
+
+        // 키 눌림 처리
+        function handleKeyPress(direction) {
+            arrowKeys[direction].classList.add('active');
+
+            if (!gameRunning || gamePaused) return;
+
+            // 해당 레인의 화살표 찾기
+            for (let i = arrows.length - 1; i >= 0; i--) {
+                const arrow = arrows[i];
+                if (arrow.type === direction && arrow.isInTarget() && !arrow.hit) {
+                    arrow.hit = true;
+                    const judgment = arrow.getJudgment();
+                    processHit(judgment);
+                    arrows.splice(i, 1);
+                    return;
+                }
+            }
+
+            // 타겟에 화살표가 없으면 Miss
+            processHit('miss');
+        }
+
+        // 키 놓음 처리
+        function releaseKey(direction) {
+            arrowKeys[direction].classList.remove('active');
+        }
+
+        // 히트 처리
+        function processHit(judgment) {
+            totalHits++;
+
+            switch (judgment) {
+                case 'perfect':
+                    score += 100 * Math.max(1, Math.floor(combo / 10) + 1);
+                    combo++;
+                    perfectHits++;
+                    showCombo('Perfect!', '#00ff00');
+                    break;
+                case 'good':
+                    score += 50 * Math.max(1, Math.floor(combo / 10) + 1);
+                    combo++;
+                    goodHits++;
+                    showCombo('Good!', '#ffff00');
+                    break;
+                case 'bad':
+                    score += 10;
+                    combo = 0;
+                    badHits++;
+                    showCombo('Bad', '#ff8800');
+                    break;
+                case 'miss':
+                    combo = 0;
+                    missHits++;
+                    showCombo('Miss', '#ff0000');
+                    break;
+            }
+
+            updateUI();
+            checkLevelUp();
+        }
+
+        // 콤보 표시
+        function showCombo(text, color) {
+            comboDisplay.textContent = text;
+            comboDisplay.style.color = color;
+            comboDisplay.style.opacity = '1';
+            comboDisplay.style.transform = 'translate(-50%, -50%) scale(1.2)';
+
+            setTimeout(() => {
+                comboDisplay.style.opacity = '0';
+                comboDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 500);
+        }
+
+        // 레벨업 체크
+        function checkLevelUp() {
+            const newLevel = Math.floor(score / 1000) + 1;
+            if (newLevel > level) {
+                level = newLevel;
+                showCombo(`Level ${level}!`, '#ffd700');
+            }
+        }
+
+        // 화살표 생성
+        function spawnArrow() {
+            if (Math.random() < difficulties[currentDifficulty].spawnRate) {
+                const type = arrowTypes[Math.floor(Math.random() * arrowTypes.length)];
+                arrows.push(new Arrow(type));
+            }
+        }
+
+        // 난이도 업데이트
+        function updateDifficulty() {
+            bpm = difficulties[currentDifficulty].bpm;
+            updateUI();
+        }
+
+        // UI 업데이트
+        function updateUI() {
+            document.getElementById('score').textContent = score.toLocaleString();
+            document.getElementById('combo').textContent = combo;
+            document.getElementById('level').textContent = level;
+            document.getElementById('bpm').textContent = bpm;
+
+            const accuracy = totalHits > 0 ?
+                Math.round(((perfectHits + goodHits) / totalHits) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        // 게임 시작
+        function startGame() {
+            gameRunning = true;
+            gamePaused = false;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+
+            // 난이도 버튼 비활성화
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.6';
+            });
+
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        // 일시정지
+        function togglePause() {
+            if (!gameRunning) return;
+
+            gamePaused = !gamePaused;
+            pauseBtn.innerHTML = gamePaused ?
+                '<i class="fas fa-play me-1"></i>계속하기' :
+                '<i class="fas fa-pause me-1"></i>일시정지';
+
+            if (!gamePaused) {
+                gameLoop = requestAnimationFrame(update);
+            }
+        }
+
+        // 게임 리셋
+        function resetGame() {
+            gameRunning = false;
+            gamePaused = false;
+
+            if (gameLoop) {
+                cancelAnimationFrame(gameLoop);
+                gameLoop = null;
+            }
+
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            pauseBtn.innerHTML = '<i class="fas fa-pause me-1"></i>일시정지';
+
+            // 난이도 버튼 활성화
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+            });
+
+            // 게임 상태 초기화
+            score = 0;
+            combo = 0;
+            totalHits = 0;
+            perfectHits = 0;
+            goodHits = 0;
+            badHits = 0;
+            missHits = 0;
+            level = 1;
+            arrows = [];
+
+            updateDifficulty();
+            render();
+        }
+
+        // 업데이트 함수
+        function update() {
+            if (!gameRunning || gamePaused) return;
+
+            // 화살표 생성
+            spawnArrow();
+
+            // 화살표 업데이트
+            for (let i = arrows.length - 1; i >= 0; i--) {
+                const arrow = arrows[i];
+                arrow.update();
+
+                // 화면을 벗어난 화살표 제거 (Miss 처리)
+                if (arrow.y > canvas.height + 50) {
+                    if (!arrow.hit) {
+                        processHit('miss');
+                    }
+                    arrows.splice(i, 1);
+                }
+            }
+
+            render();
+            gameLoop = requestAnimationFrame(update);
+        }
+
+        // 렌더링
+        function render() {
+            // 화면 지우기
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#1a1a2e');
+            gradient.addColorStop(0.5, '#16213e');
+            gradient.addColorStop(1, '#0f3460');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 레인 가이드라인
+            Object.values(lanes).forEach(x => {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 10]);
+                ctx.beginPath();
+                ctx.moveTo(x + 30, 0);
+                ctx.lineTo(x + 30, canvas.height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            });
+
+            // 타겟 라인
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+            ctx.fillRect(0, targetY - 20, canvas.width, 40);
+
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, targetY);
+            ctx.lineTo(canvas.width, targetY);
+            ctx.stroke();
+
+            // 타겟 박스
+            Object.values(lanes).forEach(x => {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, targetY - 30, 60, 60);
+
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.1)';
+                ctx.fillRect(x, targetY - 30, 60, 60);
+            });
+
+            // 화살표 그리기
+            arrows.forEach(arrow => arrow.draw());
+
+            // 게임 일시정지 화면
+            if (gamePaused) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('일시정지', canvas.width / 2, canvas.height / 2);
+
+                ctx.font = '24px Arial';
+                ctx.fillText('스페이스바 또는 버튼을 눌러 계속하기', canvas.width / 2, canvas.height / 2 + 60);
+            }
+
+            // 게임 시작 전 메시지
+            if (!gameRunning) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.font = '28px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('스페이스바 또는 시작 버튼을 눌러 게임을 시작하세요!', canvas.width / 2, canvas.height / 2);
+            }
+        }
+
+        // 게임 초기화
+        updateDifficulty();
+        render();
+
+        console.log('🎵 Arrow Dance 리듬 게임이 로드되었습니다!');
+    </script>
+</body>
+</html>
