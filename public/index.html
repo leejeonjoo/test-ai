@@ -836,7 +836,7 @@
 
                 progressBar.style.width = '50%';
 
-                const response = await fetch('/convert-to-pdf', {
+                const response = await fetch('/api/convert-to-pdf', {
                     method: 'POST',
                     body: formData
                 });
@@ -898,7 +898,7 @@
 
                 progressBar.style.width = '50%';
 
-                const response = await fetch('/merge-pdfs', {
+                const response = await fetch('/api/merge-pdfs', {
                     method: 'POST',
                     body: formData
                 });
@@ -956,11 +956,11 @@
                         <strong>다운로드 준비 완료:</strong> ${filename}
                     </div>
                     <div>
-                        <a href="${downloadUrl}" class="btn btn-success btn-sm me-2" download>
+                        <a href="${downloadUrl}" class="btn btn-success btn-sm me-2" download="${filename}">
                             <i class="fas fa-download me-1"></i>다운로드
                         </a>
-                        <button class="btn btn-outline-danger btn-sm" onclick="deleteFile('${filename}', this.parentElement.parentElement.parentElement)">
-                            <i class="fas fa-trash me-1"></i>삭제
+                        <button class="btn btn-outline-secondary btn-sm" onclick="this.parentElement.parentElement.parentElement.remove()">
+                            <i class="fas fa-times me-1"></i>닫기
                         </button>
                     </div>
                 </div>
@@ -969,28 +969,6 @@
             panel.appendChild(downloadDiv);
         }
 
-        /**
-         * 서버에서 파일 삭제
-         */
-        async function deleteFile(filename, element) {
-            try {
-                const response = await fetch(`/delete-file/${filename}`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    element.remove();
-                    showNotification('파일이 삭제되었습니다.', 'info');
-                } else {
-                    throw new Error(result.error || '파일 삭제에 실패했습니다.');
-                }
-            } catch (error) {
-                console.error('파일 삭제 오류:', error);
-                showNotification(`삭제 오류: ${error.message}`, 'danger');
-            }
-        }
 
         // 페이지 로드 시 PDF 이벤트 리스너 설정
         document.addEventListener('DOMContentLoaded', function() {

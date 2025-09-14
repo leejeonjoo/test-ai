@@ -1,28 +1,15 @@
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
-const fs = require('fs');
 const { PDFDocument } = require('pdf-lib');
 const sharp = require('sharp');
 const app = express();
-const port = 5173;
 
-// 업로드 폴더 생성
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+// Vercel에서는 동적 포트 사용
+const port = process.env.PORT || 5173;
 
-// Multer 설정 (파일 업로드)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Serverless 환경에서는 메모리 스토리지 사용
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -42,10 +29,9 @@ app.use(express.json());
 
 // 정적 파일 서빙을 위한 미들웨어 설정
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(uploadsDir));
 
 // JPG를 PDF로 변환하는 엔드포인트
-app.post('/convert-to-pdf', upload.array('images'), async (req, res) => {
+app.post('/api/convert-to-pdf', upload.array('images'), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: '업로드할 이미지를 선택해주세요.' });
@@ -54,8 +40,8 @@ app.post('/convert-to-pdf', upload.array('images'), async (req, res) => {
     const pdfDoc = await PDFDocument.create();
 
     for (const file of req.files) {
-      // 이미지 최적화
-      const optimizedBuffer = await sharp(file.path)
+      // 메모리에서 직접 이미지 처리
+      const optimizedBuffer = await sharp(file.buffer)
         .jpeg({ quality: 80 })
         .toBuffer();
 
@@ -76,22 +62,20 @@ app.post('/convert-to-pdf', upload.array('images'), async (req, res) => {
         width: width * scale,
         height: height * scale,
       });
-
-      // 임시 파일 삭제
-      fs.unlinkSync(file.path);
     }
 
     const pdfBytes = await pdfDoc.save();
     const filename = `converted-${Date.now()}.pdf`;
-    const filepath = path.join(uploadsDir, filename);
 
-    fs.writeFileSync(filepath, pdfBytes);
+    // PDF를 Base64로 인코딩하여 직접 다운로드 제공
+    const base64Pdf = Buffer.from(pdfBytes).toString('base64');
 
     res.json({
       success: true,
       message: 'PDF 변환이 완료되었습니다.',
       filename: filename,
-      downloadUrl: `/uploads/${filename}`
+      pdfData: base64Pdf,
+      downloadUrl: `data:application/pdf;base64,${base64Pdf}`
     });
 
   } catch (error) {
@@ -101,7 +85,7 @@ app.post('/convert-to-pdf', upload.array('images'), async (req, res) => {
 });
 
 // PDF 파일들을 합치는 엔드포인트
-app.post('/merge-pdfs', upload.array('pdfs'), async (req, res) => {
+app.post('/api/merge-pdfs', upload.array('pdfs'), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: '합칠 PDF 파일을 선택해주세요.' });
@@ -110,27 +94,25 @@ app.post('/merge-pdfs', upload.array('pdfs'), async (req, res) => {
     const mergedPdf = await PDFDocument.create();
 
     for (const file of req.files) {
-      const pdfBytes = fs.readFileSync(file.path);
-      const pdf = await PDFDocument.load(pdfBytes);
+      // 메모리에서 직접 PDF 처리
+      const pdf = await PDFDocument.load(file.buffer);
       const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
 
       copiedPages.forEach((page) => mergedPdf.addPage(page));
-
-      // 임시 파일 삭제
-      fs.unlinkSync(file.path);
     }
 
     const mergedPdfBytes = await mergedPdf.save();
     const filename = `merged-${Date.now()}.pdf`;
-    const filepath = path.join(uploadsDir, filename);
 
-    fs.writeFileSync(filepath, mergedPdfBytes);
+    // PDF를 Base64로 인코딩하여 직접 다운로드 제공
+    const base64Pdf = Buffer.from(mergedPdfBytes).toString('base64');
 
     res.json({
       success: true,
       message: 'PDF 병합이 완료되었습니다.',
       filename: filename,
-      downloadUrl: `/uploads/${filename}`
+      pdfData: base64Pdf,
+      downloadUrl: `data:application/pdf;base64,${base64Pdf}`
     });
 
   } catch (error) {
@@ -139,22 +121,9 @@ app.post('/merge-pdfs', upload.array('pdfs'), async (req, res) => {
   }
 });
 
-// 파일 삭제 엔드포인트
-app.delete('/delete-file/:filename', (req, res) => {
-  try {
-    const filename = req.params.filename;
-    const filepath = path.join(uploadsDir, filename);
-
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
-      res.json({ success: true, message: '파일이 삭제되었습니다.' });
-    } else {
-      res.status(404).json({ error: '파일을 찾을 수 없습니다.' });
-    }
-  } catch (error) {
-    console.error('파일 삭제 오류:', error);
-    res.status(500).json({ error: '파일 삭제 중 오류가 발생했습니다.' });
-  }
+// 헬스 체크 엔드포인트
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: '웹 앱 센터가 정상 작동중입니다.' });
 });
 
 // 모든 라우트를 index.html로 리디렉션 (SPA 지원)
@@ -162,6 +131,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`서버가 http://localhost:${port}에서 실행 중입니다`);
-});
+// Vercel에서는 app을 export, 로컬에서는 listen
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`서버가 http://localhost:${port}에서 실행 중입니다`);
+  });
+}
+
+module.exports = app;

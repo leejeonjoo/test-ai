@@ -4,13 +4,13 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
     {
       "src": "/breakout.html",
       "dest": "/public/breakout.html"
@@ -20,8 +20,17 @@
       "dest": "/public/rhythm.html"
     },
     {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico))",
+      "dest": "/public/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/server.js"
+      "dest": "/public/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
+  }
 }
